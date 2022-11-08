@@ -23,7 +23,6 @@ router.get('/reviews', async (req, res) => {
     "page": page || 1,
     "count": count || 5,
     "results": rows,
-    // "urls": photosResult
   };
 
   res.json(response);
@@ -40,15 +39,56 @@ router.get('/reviews/meta', async (req, res) => {
   // also need to grab all the ratings from reviews where prodcut id = id
   // const result = await client.query(`SELECT id, rating FROM reviews WHERE product_id = ${product_id}`);
 
-  const result2 = await client.query(`SELECT id, name FROM characteristics WHERE product_id = ${product_id}; SELECT value FROM characteristic_reviews WHERE characteristic_id = characteristics.id`);
+  // const result2 = await client.query(`SELECT id, name FROM characteristics WHERE product_id = ${product_id}; SELECT value FROM characteristic_reviews WHERE characteristic_id = characteristics.id`);
 
+  const result = await client.query(`
+    SELECT json_object_agg(rating, c) AS ratings
+    FROM (
+      SELECT rating, COUNT(*) AS c
+      FROM reviews
+      WHERE reviews.product_id = ${product_id}
+      GROUP BY reviews.rating
+    )t`)
+
+    // SELECT json_object_agg(reviews.rating, COUNT(*))
+    // FROM (
+    //   SELECT ratings, COUNT(*)
+    //   FROM reviews
+    //   WHERE reviews.product_id = ${product_id}
+    // )
+    // GROUP BY reviews.rating`)
+
+  // (
+  //   SELECT row_to_json(t)
+  //   FROM (
+  //     SELECT name AS feature
+
+  //     FROM characteristics
+  //     WHERE characteristics.product_id = ${product_id}
+  //   ) t
+  // ) AS characteristics
+
+  // (
+  //   SELECT row_to_json(t)
+  //   FROM (
+  //     SELECT rating AS ratings, COUNT(*)
+  //     FROM reviews
+  //     WHERE reviews.product_id = ${product_id}
+  //     GROUP BY rating
+  //   ) t
+  // )
+
+  // (
+  //   SELECT id, value
+  //   FROM characteristics_reviews
+  //   WHERE characteristic_reviews.characteristic_id = characteristics.id
+  // )
 
   // const result = await client.query(`SELECT * FROM characteristics WHERE product_id = ${product_id} JOIN characteristic_reviews ON characteristic_reviews.characteristic_id = characteristics.id`);
-  res.json(result2);
+  res.json(result);
 
   // using characterists_id, find characteristic_reviews
 
-  // res.json('meta working');
 });
 
 router.put('/reviews/:review_id/helpful', async (req, res) => {
