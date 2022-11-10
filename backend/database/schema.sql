@@ -63,3 +63,6 @@ CREATE TABLE characteristic_reviews (
 FROM '/Users/kevinz/Documents/RFP2209/SDC-Data/characteristics.csv'
 DELIMITER ','
 CSV HEADER;
+
+-- CREATE INDEX product_index ON reviews (product_id);
+-- CREATE INDEX review_id_on_photos ON reviews_photos (review_id);
